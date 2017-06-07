@@ -34,3 +34,5 @@ Isomorphic application => server rendered + single page web app.
 With Isomorphic architecture you can serve portions of your site without requiring JavaScript.
 
 Since we serve a complete page to the browser, users can at least see your content.
+
+## Building the View with React
