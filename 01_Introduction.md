@@ -60,3 +60,5 @@ Views or node middleware dispatches Action => Reducers => new Store with changes
 ONLY REDUCERS CAN UPDATE THE STORE. Store is read only.
 
 ## Building the app: webpack
+
+Webpack allow to bundle all of our dependencies together, including NPM packages.
