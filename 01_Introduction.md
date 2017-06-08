@@ -36,3 +36,27 @@ With Isomorphic architecture you can serve portions of your site without requiri
 Since we serve a complete page to the browser, users can at least see your content.
 
 ## Building the View with React
+
+React is a library for creating UI.
+
+### Understanding the Virtual DOM
+
+Virtual DOM => representation of the browser DOM written with JavaScript.
+
+React compares the virtual tree to the current tree and calculates what needs to be updated.
+
+React updates only the parts of the DOM that has updates.
+
+The Virtual DOM can be used on server side and even render as a "string" `ReactDOM.renderToString`.
+
+## Business Logic and Model: Redux
+
+### One Way data Flow
+
+Redux holds the state of your app in its store, providing a single source of truth for your application.
+
+Views or node middleware dispatches Action => Reducers => new Store with changes.
+
+ONLY REDUCERS CAN UPDATE THE STORE. Store is read only.
+
+## Building the app: webpack
