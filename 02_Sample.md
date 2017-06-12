@@ -44,3 +44,5 @@ Libraries required to run the application.
   ]
 }
 ```
+
+The view doesn't worry about the implementation of the business logic and the app state doesn't worry about how it will be displayed.
