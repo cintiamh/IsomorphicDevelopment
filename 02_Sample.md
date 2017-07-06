@@ -4,6 +4,13 @@
 
 Example App: https://github.com/isomorphic-dev-js/chapter2-a-sample-isomorphic-app
 
+Building Blocks:
+* React - View
+* Redux - Business logic
+* Babel - Compile JS
+* Webpack - Build tool: bundle code for the browser.
+* Express - Server side.
+
 ### devDependencies
 
 Build Tools:
@@ -45,4 +52,66 @@ Libraries required to run the application.
 }
 ```
 
+https://babeljs.io
+
 The view doesn't worry about the implementation of the business logic and the app state doesn't worry about how it will be displayed.
+
+src/server.js
+```javascript
+require('babel-register');
+require('./app.es6');
+```
+
+### Building the code for the browser with webpack
+
+Webpack features:
+
+* Using loaders to compile ES6 and JSX code and load static assets via loaders.
+* Code splitting for smart bundling of code into smaller packages
+* The ability to build code node or the browser.
+* Out of the box sourcemaps
+* The webpack dev server.
+* A built-in watch option.
+
+Example webpack.config.js:
+```javascript
+module.exports = {
+  entry: "./src/main.jsx",
+  output: {
+    path: __dirname + '/dist/',
+    filename: "browser.js"
+  },
+  module: {
+    loaders: [
+      {
+        test: /\.(jsx|es6)$/,
+        exclude: /node_modules/,
+        loader: "babel-loader"
+      }
+    ]
+  },
+  resolve: {
+    extensions: ['', '.js', '.jsx', '.css', '.es6']
+  }
+}
+```
+
+## The view
+
+The app lifecycle is single directional:
+
+```
+View (React Components) ===> Application State (Redux) --|
+          ^                                              |
+          |----------------------------------------------|
+```
+
+### React & Components
+
+### App Wrapper Component
+
+`app.jsx` is a container component.
+
+### HTML container
+
+## App State: Redux
