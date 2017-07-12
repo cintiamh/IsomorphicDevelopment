@@ -46,3 +46,37 @@ For a full list: https://facebook.github.io/react/docs/jsx-in-depth.html
 * you cannot use HTML style comments: `<!-- html comment -->` use a JavaScript comment instead `{ /* My comment */ }`
 
 ### Building a reusable component
+
+In a React view each repeatable element can become a component. Other components wrap the smaller composable components and determines the layout.
+
+### Using Props
+
+You can pass in the name property with a value:
+
+```javascript
+<ListItem name="Cleanup my desk" />
+```
+
+The component can then access this value on the `props` object.
+
+```html
+<div>{props.name}</div>
+```
+
+This in turn will render like this:
+
+```html
+<div>Cleanup my desk</div>
+```
+
+* Properties are immutable within their components.
+* A parent assign properties to its children upon their creation.
+* The child is not supposed to change to modify its properties.
+
+### Functional components
+
+Given a set of inputs, the component will return a predictable output.
+
+### Conditionals and Looping
+
+## Interactive components: React state
