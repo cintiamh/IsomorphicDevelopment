@@ -200,3 +200,124 @@ export function fetchNotifications() {
 ```
 
 ## Using Redux with React components
+
+In a React app, the actions are typically dispatched from components.
+
+In order to have access to the store in a component, you need to wire up your React components to Redux using `react-redux`.
+
+You need a top component called `Provider`.
+You also need a Higher-Order Component called `connect`.
+
+### Wrapping your app with Provider
+
+`Provider` is a React component from `react-redux` that acts as the root of your application and makes the store available to the `connect` HOC.
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './components/app.jsx';
+import { Provider } from 'react-redux';
+import initRedux from './init-redux.es6';
+require('./style.css');
+
+const initialState = window.__INITIAL_STATE;
+const store = initRedux(initialState);
+
+store.subscribe(() => {
+  console.log('Store updated', store.getState());
+});
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('react-content')
+)
+```
+
+Now you have access to the store in your components.
+
+### Subscribing to the store from React
+
+Now you need to wrap your container components in the `connect` HOC.
+This component handles subscribing to the store for you.
+
+`connect` also provides some helper methods to map the store to props and to make calls from the view.
+
+```javascript
+export default connect(mapStateToProps, mapDispatchToProps)(Component);
+```
+
+Connect React to Redux:
+```javascript
+class App extends React.Component {
+  componentDidMount() {}
+  getSystemNotifications(id) {
+    let items = [];
+    if (this.props.all) {
+      this.props.all.forEach((item, index) => {
+        if (item.serviceId == id) {
+          let classes = classnames("ui", "message", item.messageType);
+          items.push(
+            <div className={classes} key={index}>
+              <i className="close icon" onClick={this.dismiss.bind(this, index)}></i>
+              <p>
+                {item.message}
+              </p>
+            </div>
+          )
+        }
+      })
+    }
+    return items;
+  }
+  render() {}
+}
+
+function mapStateToProps(state) {
+  let { notifications } = state.notifications;
+  let { refresh } = state.settings;
+  return {
+    notifications,
+    refresh
+  }
+}
+
+function mapDispatchToProps(dispatch) {}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
+```
+
+With `mapDispatchToProps`, you are making actions available to be dispatched directly from the components props.
+
+This helper method lets you use JavaScript's bind to automatically dispatch actions when they are called from the view.
+
+```javascript
+import React from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as actionCreators from '../action-creators';
+import * as settingsActionCreators from '../settings-action-creators';
+
+import CreateNotification from './create-notification';
+import Settings from './settings';
+import classnames from 'classnames';
+
+class App extends React.Component {
+  // ... component implementation code
+  componentDidMount() {
+    intervalId = setInterval(() => {
+      this.props.notificationActions.fetchNotifications();
+    }, this.props.refresh * 1000);
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    notificationActions: bindActionCreators(actionCreators, dispatch),
+    settingsActions: bindActionCreators(settingsActionCreators, dispatch)
+  }
+}
+
+export default connect(null, mapDispatchToProps)(App)
+```
