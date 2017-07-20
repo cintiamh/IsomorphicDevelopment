@@ -125,3 +125,78 @@ store.dispatch(updateRefreshDelay(5));
 The reducer will be triggered and the store will be updated.
 
 ## Applying Middleware to Redux
+
+Redux let you extend the default functionality of the dispatcher.
+
+These middleware will be called before the final default dispatch behavior.
+
+```javascript
+middleware1(dispatchedAction).middleware2(dispatchedAction).middleware3(dispatchedAction).dispatch(dispatchedAction)
+```
+
+This allows you to add functionality for debugging and making asynchronous calls.
+
+### Middleware basics: debugging
+
+Using Redux Logger library.
+
+You add middleware when you instantiate your store:
+```javascript
+export default function() {
+  const reducer = combineReducers({ ... });
+  let middleware = [logger];
+  return compose(
+    applyMiddleware(...middleware)
+  )(createStore)(reducer);
+}
+```
+
+* Call `compose` passing in the store so that the middleware will be applied to the store.
+* Call `applyMiddleware` on the middleware array to setup the middleware properly.
+
+### Handling asynchronous actions
+
+Asynchronous action creators wait for something to happen (like a network call to complete) and then return the action object.
+
+Redux Thunk: access the dispatch object inside of your action creator function.
+
+Action creator:
+```javascript
+export const UPDATE_ACTION = 'UPDATE_ACTION';
+
+export function actionCreator() {
+  return dispatch => {
+    return dispatch({
+      type: UPDATE_ACTION
+    })
+  }
+}
+```
+
+Asynchronous Action Creators:
+```javascript
+import request from 'isomorphic-fetch';
+
+export const FETCH_NOTIFICATIONS = 'FETCH_NOTIFICATIONS';
+
+export function fetchNotifications() {
+  return dispatch => {
+    let headers = new Headers({
+      "Content-Type": "application/json"
+    });
+    return fetch(
+      'http://localhost:3000/notications',
+      { headers: headers }
+    ).then((response) => {
+      return response.json().then(data => {
+        return dispatch({
+          type: FETCH_NOTIFICATIONS,
+          notifications: data
+        })
+      })
+    })
+  }
+}
+```
+
+## Using Redux with React components
