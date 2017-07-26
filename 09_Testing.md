@@ -173,3 +173,39 @@ import React from 'react';
 * `unmount`: Test any code that happens in your `componentWillUnmount`.
 
 ## Testing: Thinking Isomorphically
+
+With an isomorphic app, it isn't enough to write unit tests that run in the browser.
+
+Any code in your app that runs on the server should be tested with Mocha in the terminal.
+
+Any code that runs in the browser should be tested in a browser environment with Karma.
+
+### Testing React Components on the server
+
+Enzyme's shallow function doesn't require a real DOM.
+This means that you can run these tests with Karma and with Mocha in the terminal.
+
+### Test all the things
+
+It's important to account for the multiple ways of getting to each part of your app.
+
+1. The initial page load off of the server.
+2. Navigating in your app via Single Page Application (SPA) flow.
+
+## Debugging Tools
+
+### React Chrome Extension
+
+The React Chrome Extension loads React Dev Tools and gives you direct insight into the React components in running app.
+It lets you inspect the HTML structure and see how components are wrapped.
+
+* See every component in the tree.
+* See props and state.
+
+### Redux Chrome Extension
+
+The Redux Chrome Extension is an extension that provides a nearly zero configuration implement of Redux Dev Tools.
+
+https://github.com/zalmoxisus/redux-devtools-extension
+
+One of the coolest features of this debugging tool, is the ability to replay actions.
