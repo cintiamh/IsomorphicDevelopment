@@ -133,4 +133,208 @@ Or you can change the value in the start script to be production on the server.
   },
 ```
 
-## SEO & Sharing
+## SEO (search engine optimization) & Sharing
+
+Usually you would insert SEO meta tags in the head of the HTML page, and they are not part of a React component.
+
+### Setting up metadata tags
+
+Meta data tags go in the head, which is static once being rendered by the server. It does not change on each React render.
+
+To create the SEO meta tags in the head, one way is to use a static function so that your components can optionally declare their SEO microdata tag needs.
+
+Add a static function for creating meta tags: src/components/detail.jsx
+```javascript
+class Detail extends React.Component {
+  static createMetatags(params, store) {
+    const tags = [];
+    const item = store.products ? store.products.currentProduct : null;
+    if (item) {
+      tags.push({
+        name: 'description',
+        content: item.description
+      });
+      tags.push({
+        property: 'og:description',
+        content: item.description
+      });
+      tags.push({
+        property: 'og:title',
+        content: item.name
+      });
+      tags.push({
+        property: 'og:url',
+        content: `http://localhost:3000/product/detail/${item.id}`
+      });
+      tags.push({
+        property: 'og:image',
+        content: item.thumbnail
+      });
+    }
+    return tags;
+  }
+}
+```
+
+### Rendering meta tags into the head on the server
+
+Render meta tags as part of HTML.jsx: src/components/html.jsx
+```javascript
+const HTML = (props) => {
+  const metatagsArray = [];
+  props.metatags.forEach((item) => {
+    metatagsArray.push(
+      <meta {...item} />
+    );
+  });
+
+  return (
+    <html lang="en">
+      <head>
+        <title
+          dangerouslySetInnerHTML={{
+            __html: props.title || 'All Things Westies'
+          }}
+        />
+        {metatagsArray}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css"
+        />
+        <link rel="stylesheet" href="/assets/style.css" />
+      </head>
+    </html>
+  );
+};
+```
+
+Finally, you need to add the code to renderView.jsx that will pull the meta tag arrays out of the individual components.
+
+Fetch meta tags array: src/middleware/renderView.jsx
+```javascript
+        const seoTags = flattenStaticFunction(
+          renderProps,
+          'createMetatags',
+          serverState
+        );
+
+        const html = renderToString(
+          <HTML
+            html={app}
+            serverState={stringifiedServerState}
+            metatags={seoTags}
+            title={title}
+          />
+        );
+```
+
+### Handling the title
+
+#### Title on the server
+
+Handling the title on the server is similar to handling the meta data on the server.
+
+Each top-level component should provide a static function that outputs the title.
+
+Create title static function: src/components/detail.jsx
+```javascript
+class Detail extends React.Component {
+
+  static createTitle(props) {
+    return `${props.name} - All Things Westies`;
+  }
+
+  static getTitle(params, store) {
+    const currentProduct = store.products && store.products.currentProduct;
+
+    return Detail.createTitle(currentProduct);
+  }
+
+  // ...
+}
+```
+
+Now you can setup the title on the server.
+
+Add title for the route: src/middleware/renderView.jsx
+```javascript
+        const title = flattenStaticFunction(
+          renderProps,
+          'getTitle',
+          serverState
+        );
+        const html = renderToString(
+          <HTML
+            html={app}
+            serverState={stringifiedServerState}
+            metatags={seoTags}
+            title={title}
+          />
+        );
+```
+
+Now for last you need to change the title in the html.jsx to use the passed in prop.
+
+Render the title for the route: src/components/html.jsx
+```javascript
+const HTML = (props) => {
+  // ...
+  return (
+    <html lang="en">
+      <head>
+        <title
+          dangerouslySetInnerHTML={{
+            __html: props.title || 'All Things Westies'
+          }}
+        />
+        {metatagsArray}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css"
+        />
+        <link rel="stylesheet" href="/assets/style.css" />
+      </head>
+    </html>
+  );
+}
+```
+
+#### Title on the browser
+
+The title tag is user facing and should get updated on every route change.
+
+This creates a unique situation where you need to update a part of the DOM that is not controlled by React.
+
+src/components/detail.jsx
+```javascript
+class Detail extends React.Component {
+  componentDidMount() {
+    document.getElementsByTagName('title')[0].innerHTMl = Detail.createTitle(this.props);
+  }
+
+  componentDidUpdate() {
+    document.getElementsByTagName('title')[0].innerHTMl = Detail.createTitle(this.props);
+  }
+}
+```
+
+This kind of situation is rare but when it occurs, using direct DOM access is perfectly reasonable.
+Just make sure to ask yourself, "Can I do this the React way before accessing the DOM?".
+
+## Multiple sources of truth
+
+When building isomorphic apps, you may run into cases where you can get the same information from the server and the browser.
+
+So pick a single source of truth. And the first place your app runs code is the server, so much as possible, use the server to parse out this information.
+
+### User Agent best practices
+
+1. Always use a single source of truth. This means parsing the User Agent on the server and passing it down to the browser.
+2. Use the broadest definition possible. So rather than asking is this an iPhone? Ask is this a mobile device? It is extremely rare to need to know a specific version of a device category or specific browser.
+
+### Parse the User Agent
+
+There are only two things you need to do to parse out the user agent into a usable value for your application:
+
+1. You'll need to add an action and reducer.
+2. You'll need to pass the User Agent header information into that action on the server.
