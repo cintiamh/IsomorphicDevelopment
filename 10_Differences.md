@@ -338,3 +338,179 @@ There are only two things you need to do to parse out the user agent into a usab
 
 1. You'll need to add an action and reducer.
 2. You'll need to pass the User Agent header information into that action on the server.
+
+UA parser: https://github.com/faisalman/ua-parser-js
+
+User Agent action: src/shared/app-action/creators.es6
+```javascript
+import UAParser from 'ua-parser-js';
+
+export const PARSE_USER_AGENT = 'PARSE_USER_AGENT';
+
+export function parseUserAgent(requestHeaders) {
+  const uaParser = new UAParser();
+  let userAgentObject;
+  if (requestHeaders && requestHeaders['User-Agent']) {
+    const userAgent = requestHeaders['User-Agent'];
+    uaParser.setUA(userAgent);
+    userAgentObject = uaParser.getResult(userAgent);
+  }
+  return {
+    userAgent: userAgentObject,
+    type: PARSE_USER_AGENT
+  };
+}
+
+export default {
+  parseUserAgent
+};
+```
+
+User Agent reducer: src/shared/app-reducer.es6
+```javascript
+import {
+  PARSE_USER_AGENT
+} from './app-action-creators.es6';
+
+export default function app(state = {}, action) {
+  switch (action.type) {
+    case PARSE_USER_AGENT:
+      return {
+        ...state,
+        userAgent: action.userAgent ? action.userAgent : state.userAgent
+      };
+    default:
+      return state;
+  }
+}
+```
+
+Importing the app reducer: src/shared/init-redux.es6
+```javascript
+import app from './app-reducer.es6';
+
+export default function (initialStore = {}) {
+  const reducer = combineReducers({
+    products,
+    cart,
+    search,
+    app
+  });
+  // ...
+}
+```
+
+Calling parseUserAgent from the view: src/components/app.jsx
+```javascript
+import { parseUserAgent } from '../shared/app-action-creators.es6';
+
+class App extends React.Component {
+
+  static loadData(params, store, request = {}) {
+    return [
+      parseUserAgent.bind(null, request.headers)
+    ];
+  }
+}
+```
+
+Pass the request to loadData: src/middleware/renderView.jsx
+```javascript
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { Provider } from 'react-redux';
+import { match, RouterContext } from 'react-router';
+import { routes } from '../shared/sharedRoutes';
+import initRedux from '../shared/init-redux.es6';
+import HTML from '../components/html';
+
+function flattenStaticFunction(renderProps, staticFnName, store = {}, request) {
+  let results = renderProps.components.map((component) => {
+    if (component) {
+      if (component.displayName &&
+        component.displayName.toLowerCase().indexOf('connect') > -1
+      ) {
+        if (component.WrappedComponent[staticFnName]) {
+          return component.WrappedComponent[staticFnName](
+            renderProps.params,
+            store,
+            request
+          );
+        }
+      } else if (component[staticFnName]) {
+        return component[staticFnName](
+          renderProps.params,
+          store,
+          request
+        );
+      }
+    }
+    return [];
+  });
+
+  results = results.reduce((flat, toFlatten) => {
+    return flat.concat(toFlatten);
+  }, []);
+
+  return results;
+}
+
+export default function renderView(req, res, next) {
+  const matchOpts = {
+    routes: routes(),
+    location: req.url
+  };
+  const handleMatchResult = (error, redirectLocation, renderProps) => {
+    if (!error && !redirectLocation && renderProps) {
+      const store = initRedux();
+      const actions = flattenStaticFunction(
+        renderProps,
+        'loadData',
+        null,
+        req
+      );
+      const promises = actions.map((initialAction) => {
+        return store.dispatch(initialAction());
+      });
+      Promise.all(promises).then(() => {
+        const serverState = store.getState();
+        const stringifiedServerState = JSON.stringify(serverState);
+
+        const seoTags = flattenStaticFunction(
+          renderProps,
+          'createMetatags',
+          serverState
+        );
+
+        const title = flattenStaticFunction(
+          renderProps,
+          'getTitle',
+          serverState
+        );
+
+        const app = renderToString(
+          <Provider store={store}>
+            <RouterContext routes={routes} {...renderProps} />
+          </Provider>
+        );
+        const html = renderToString(
+          <HTML
+            html={app}
+            serverState={stringifiedServerState}
+            metatags={seoTags}
+            title={title}
+          />
+        );
+        return res.send(`<!DOCTYPE html>${html}`);
+      }).catch(() => {
+        return next();
+      });
+    } else {
+      next();
+    }
+  };
+  match(matchOpts, handleMatchResult);
+}
+```
+
+On the browser, the action results in an undefined value. The reducer continues to use the value from the server, ensuring a single source of truth.
