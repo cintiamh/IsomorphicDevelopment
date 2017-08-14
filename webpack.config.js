@@ -1,9 +1,26 @@
-module.exports = {
-  entry: './src/main.jsx',
-  devtool: 'source-map',
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+
+const PATHS = {
+  src: path.join(__dirname, 'src'),
+  main: path.join(__dirname, 'src/main.jsx'),
+  dist: path.join(__dirname, 'dist')
+};
+
+const commonConfig = {
+  entry: {
+    main: PATHS.main
+  },
+  plugins: [
+    new CleanWebpackPlugin(['dist']),
+    new HtmlWebpackPlugin({
+      title: 'Output Management'
+    })
+  ],
   output: {
-    path: __dirname + '/dist/',
-    filename: 'browser.js'
+    path: PATHS.dist,
+    filename: '[name].js'
   },
   module: {
     rules: [
@@ -22,3 +39,31 @@ module.exports = {
     extensions: ['.js', '.jsx', '.css', '.es6', '.json']
   }
 };
+
+const productionConfig = () => commonConfig;
+
+const developmentConfig = () => {
+  const config = {
+    devtool: 'source-map',
+    devServer: {
+      historyApiFallback: true,
+      stats: 'errors-only',
+      host: process.env.HOST,
+      port: process.env.PORT || 3000
+    }
+  };
+
+  return Object.assign(
+    {},
+    commonConfig,
+    config
+  )
+};
+
+module.exports = (env) => {
+  if (env === 'production') {
+    return productionConfig();
+  }
+
+  return developmentConfig();
+}

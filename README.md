@@ -40,6 +40,7 @@ $ npm i webpack css-loader style-loader babel-loader --save-dev
 $ npm i babel-core babel-cli babel-preset-es2015 babel-preset-react --save-dev
 $ npm i babel-plugin-transform-es2015-destructuring babel-plugin-transform-es2015-parameters babel-plugin-transform-object-rest-spread --save-dev
 $ npm i react react-dom --save
+$ npm i webpack-dev-server html-webpack-plugin clean-webpack-plugin --save-dev
 $ touch .babelrc
 $ mkdir src
 $ mkdir dist
