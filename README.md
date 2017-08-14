@@ -31,3 +31,58 @@ Isomorphic Development with JavaScript
 * redux-thunk: Redux middleware.
 * redux-promise-middleware: Redux middleware that supports promises.
 * superagent: isomorphic XHR request handling library.
+
+## Applying React
+
+```
+$ npm init -y
+$ npm i webpack css-loader style-loader babel-loader --save-dev
+$ npm i babel-core babel-cli babel-preset-es2015 babel-preset-react --save-dev
+$ npm i babel-plugin-transform-es2015-destructuring babel-plugin-transform-es2015-parameters babel-plugin-transform-object-rest-spread --save-dev
+$ npm i react react-dom --save
+$ touch .babelrc
+$ mkdir src
+$ mkdir dist
+$ touch webpack.config.js
+$ touch src/main.jsx
+```
+
+.babelrc
+```javascript
+{
+  "presets": ["es2015", "react"],
+  "plugins": [
+    "transform-es2015-destructuring",
+    "transform-es2015-parameters",
+    "transform-object-rest-spread"
+  ]
+}
+```
+
+webpack.config.js
+```javascript
+module.exports = {
+  entry: './src/main.jsx',
+  devtool: 'source-map',
+  output: {
+    path: __dirname + '/dist/',
+    filename: 'browser.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(jsx|es6)$/,
+        exclude: /node_modules|examples/,
+        loader: 'babel-loader'
+      },
+      {
+        test: /\.css$/,
+        loaders: ['style-loader', 'css-loader']
+      }
+    ]
+  },
+  resolve: {
+    extensions: ['.js', '.jsx', '.css', '.es6', '.json']
+  }
+};
+```
