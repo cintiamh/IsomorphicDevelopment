@@ -14,7 +14,9 @@ const commonConfig = {
   plugins: [
     new CleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
-      title: 'Output Management'
+      title: 'Output Management',
+      template: 'src/templates/index.template.ejs',
+      inject: 'body'
     })
   ],
   output: {

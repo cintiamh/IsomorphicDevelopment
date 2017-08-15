@@ -7,5 +7,5 @@ ReactDOM.render(
   <BrowserRouter>
     <Routes />
   </BrowserRouter>,
-  document.getElementsByTagName('body')[0]
+  document.getElementById('root')
 );

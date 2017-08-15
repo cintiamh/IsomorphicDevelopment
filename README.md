@@ -78,7 +78,9 @@ const commonConfig = {
   plugins: [
     new CleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
-      title: 'Output Management'
+      title: 'Output Management',
+      template: 'src/templates/index.template.ejs',
+      inject: 'body'
     })
   ],
   output: {
@@ -129,6 +131,20 @@ module.exports = (env) => {
   }
   return developmentConfig();
 }
+```
+
+src/templates/index.template.ejs
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>Everything Westies</title>
+  </head>
+  <body>
+    <div id='root'></div>
+  </body>
+</html>
 ```
 
 ### React-Router
@@ -189,6 +205,6 @@ ReactDOM.render(
   <BrowserRouter>
     <Routes />
   </BrowserRouter>,
-  document.getElementsByTagName('body')[0] // this is actually better if it's an id
+  document.getElementById('root')
 );
 ```
