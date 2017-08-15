@@ -62,12 +62,28 @@ $ touch src/main.jsx
 
 webpack.config.js
 ```javascript
-module.exports = {
-  entry: './src/main.jsx',
-  devtool: 'source-map',
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+
+const PATHS = {
+  main: './src/main.jsx',
+  dist: path.join(__dirname, 'dist')
+};
+
+const commonConfig = {
+  entry: {
+    main: PATHS.main
+  },
+  plugins: [
+    new CleanWebpackPlugin(['dist']),
+    new HtmlWebpackPlugin({
+      title: 'Output Management'
+    })
+  ],
   output: {
-    path: __dirname + '/dist/',
-    filename: 'browser.js'
+    path: PATHS.dist,
+    filename: '[name].js'
   },
   module: {
     rules: [
@@ -86,4 +102,93 @@ module.exports = {
     extensions: ['.js', '.jsx', '.css', '.es6', '.json']
   }
 };
+
+const productionConfig = () => commonConfig;
+
+const developmentConfig = () => {
+  const config = {
+    devtool: 'source-map',
+    devServer: {
+      historyApiFallback: true,
+      stats: 'errors-only',
+      host: process.env.HOST,
+      port: process.env.PORT || 3000
+    }
+  };
+
+  return Object.assign(
+    {},
+    commonConfig,
+    config
+  )
+};
+
+module.exports = (env) => {
+  if (env === 'production') {
+    return productionConfig();
+  }
+  return developmentConfig();
+}
+```
+
+### React-Router
+
+```
+$ npm i react-router-dom --save
+$ touch src/routes.jsx
+$ mkdir src/components
+$ touch src/components/app.jsx
+```
+
+src/routes.jsx:
+```javascript
+import React from 'react';
+import { Switch, Route } from 'react-router-dom';
+import App from './components/app';
+
+const Routes = () => (
+  <Switch>
+    <Route exact path="/" component={App} />
+  </Switch>
+);
+
+export default Routes;
+```
+
+src/components/app.jsx:
+```javascript
+import React from 'react';
+
+const App = (props) => {
+  return (
+    <div>
+      <div className="ui fixed inverted menu">
+        <h1 className="header item">All Things Westies</h1>
+        <a to="/products" className="item">Products</a>
+        <a to="/cart" className="item">Cart</a>
+        <a to="/profile" className="item">Profile</a>
+      </div>
+      <div className="ui main text container">
+        Content Placeholder
+      </div>
+    </div>
+  );
+};
+
+export default App;
+```
+
+src/main.jsx:
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom';
+import Routes from './routes';
+
+ReactDOM.render(
+  <BrowserRouter>
+    <Routes />
+  </BrowserRouter>,
+  document.getElementsByTagName('body')[0] // this is actually better if it's an id
+);
 ```
