@@ -161,10 +161,16 @@ src/routes.jsx:
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import App from './components/app';
+import Cart from './components/cart';
+import Products from './components/products';
+import Profile from './components/profile';
 
 const Routes = () => (
   <Switch>
     <Route exact path="/" component={App} />
+    <Route exact path="/cart" component={Cart} />
+    <Route path="/products" component={Products} />
+    <Route path="/profile" component={Profile} />
   </Switch>
 );
 
@@ -174,15 +180,16 @@ export default Routes;
 src/components/app.jsx:
 ```javascript
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const App = (props) => {
   return (
     <div>
       <div className="ui fixed inverted menu">
         <h1 className="header item">All Things Westies</h1>
-        <a to="/products" className="item">Products</a>
-        <a to="/cart" className="item">Cart</a>
-        <a to="/profile" className="item">Profile</a>
+        <Link to="/products" className="item">Products</Link>
+        <Link to="/cart" className="item">Cart</Link>
+        <Link to="/profile" className="item">Profile</Link>
       </div>
       <div className="ui main text container">
         Content Placeholder
@@ -208,3 +215,5 @@ ReactDOM.render(
   document.getElementById('root')
 );
 ```
+
+Tutorial for React-router-dom: https://medium.com/@pshrmn/a-simple-react-router-v4-tutorial-7f23ff27adf
