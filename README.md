@@ -217,3 +217,63 @@ ReactDOM.render(
 ```
 
 Tutorial for React-router-dom: https://medium.com/@pshrmn/a-simple-react-router-v4-tutorial-7f23ff27adf
+
+## Redux
+
+### Redux middleware
+
+* logger
+* redux thunk: handle asynchronous actions
+* isomorphic-fetch: both server and the browser can handle fetch call
+
+```
+$ npm i redux redux-logger redux-thunk isomorphic-fetch --save
+```
+
+## Building the Server
+
+```
+$ npm i express babel-register --save
+```
+
+src/server.js
+```javascript
+require('babel-register');
+require('./app.js');
+```
+
+src/app.js
+```javascript
+import express from 'express';
+
+const app = express();
+
+app.listen(3000, () => {
+  console.log('App listening on port: 3000');
+});
+```
+
+### Setting up Routing with Express
+
+```javascript
+app.get('/test', (req, res) => {
+  res.send('Test router success!');
+});
+```
+
+#### Regular expression in routes
+
+To re-use code from React router:
+```javascript
+app.get('/*', (req, res) => {
+  res.send(`${req.url} route success!`);
+});
+```
+
+### Adding Middleware for view rendering
+
+https://www.npmjs.com/package/react-router-config
+
+```
+$ npm i react-router-config --save
+```

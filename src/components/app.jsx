@@ -11,10 +11,14 @@ const App = (props) => {
         <Link to="/profile" className="item">Profile</Link>
       </div>
       <div className="ui main text container">
-        Content Placeholder
+        {props.children}
       </div>
     </div>
   );
 };
+
+App.propTypes = {
+  children: React.PropTypes.element
+}
 
 export default App;
